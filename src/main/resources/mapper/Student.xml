@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--MyBatis配置文件-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mjw.lab.dao.mapper.StudentMapper">
+
+    <select id="count" resultType="map">
+        select major,COUNT(id) from student where exist = true group by major
+    </select>
+
+    <select id="getAllStudent" resultType="com.mjw.lab.dao.pojo.Student">
+        select * from student_view
+    </select>
+
+    <select id="getTeacherStudent" resultType="com.mjw.lab.dao.pojo.Student">
+        select * from student_view,tea_stu where student_view.id=tea_stu.student_id and tea_stu.teacher_id=#{teacherId}
+    </select>
+
+
+</mapper>

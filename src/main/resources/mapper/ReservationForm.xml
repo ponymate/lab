@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--MyBatis配置文件-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mjw.lab.dao.mapper.ReservationFormMapper">
+
+    <select id="getReservationOfStudent" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,tea_stu,teacher
+            where reservation_form.type='student'
+              and reservation_form.exist=true
+              and reservation_form.borrower_id=tea_stu.student_id
+              and tea_stu.teacher_id=#{teacherId}
+    </select>
+
+    <select id="getReservationOfStudentIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,tea_stu,teacher
+        where reservation_form.type='student'
+          and reservation_form.exist=true
+          and reservation_form.device_adm_id is not null
+          and reservation_form.borrower_id=tea_stu.student_id
+          and tea_stu.teacher_id=#{teacherId}
+    </select>
+
+
+</mapper>

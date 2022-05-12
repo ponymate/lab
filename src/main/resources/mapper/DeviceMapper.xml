@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--MyBatis配置文件-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mjw.lab.dao.mapper.DeviceMapper">
+
+    <select id="getAllDeviceByTime" resultType="com.mjw.lab.dao.pojo.Device">
+        select * from device where exist = true and id not in
+                                                     (select device_id from reservation_form where begin_time between #{startTime} and #{endTime})
+    </select>
+
+    <select id="getAllDevice" resultType="com.mjw.lab.dao.pojo.Device">
+        select * from device where exist=true
+    </select>
+
+</mapper>
