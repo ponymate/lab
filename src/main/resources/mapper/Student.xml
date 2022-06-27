@@ -9,11 +9,19 @@
     </select>
 
     <select id="getAllStudent" resultType="com.mjw.lab.dao.pojo.Student">
-        select * from student_view
+        select * from student
     </select>
 
     <select id="getTeacherStudent" resultType="com.mjw.lab.dao.pojo.Student">
-        select * from student_view,tea_stu where student_view.id=tea_stu.student_id and tea_stu.teacher_id=#{teacherId}
+        select * from student,teacher where student.tutor_id=teacher.id and teacher.id=#{teacherId}
+    </select>
+
+    <select id="getTeacherStudentByName" resultType="com.mjw.lab.dao.pojo.Student">
+        select * from student,teacher where student.tutor_id=teacher.id and teacher.id=#{teacherId} and student.name like '%${name}%'
+    </select>
+
+    <select id="getAllStudentByName" resultType="com.mjw.lab.dao.pojo.Student">
+        select * from student,teacher where student.tutor_id=teacher.id and  student.name like '%${name}%'
     </select>
 
 

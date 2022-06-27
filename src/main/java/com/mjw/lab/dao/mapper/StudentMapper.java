@@ -13,9 +13,13 @@ import java.util.Map;
 public interface StudentMapper extends BaseMapper<Student> {
 
     @MapKey("major")
-    public List<Map<String, Integer>> count();
+    List<Map<String, Integer>> count();
 
-    public List<Student> getAllStudent(Page<Student> page);
+    Page<Student> getAllStudent(Page<Student> page);
 
-    public List<Student> getTeacherStudent(Page<Student> page,Long teacherId);
+    Page<Student> getTeacherStudent(Page<Student> page,Long teacherId);
+
+    Page<Student> getTeacherStudentByName(Page<Student> studentPage, Long id, String name);
+
+    Page<Student> getAllStudentByName(Page<Student> studentPage, String name);
 }

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -33,12 +32,15 @@ public class DeviceServiceImpl implements DeviceService {
     PermissionUtils permissionUtils;
 
     @Override
-    public Result getAllDevice(Map<String,String> date,Map<String,String> pageParm) {
+    public Result getAllDevice(Map<String,String> date,Map<String,String> parm) {
 
-        Page<Device> page = new Page<>(Integer.parseInt(pageParm.get("currentPage")), Integer.parseInt(pageParm.get("pageSize")));
+        Page<Device> page = new Page<>(Integer.parseInt(parm.get("currentPage")), Integer.parseInt(parm.get("pageSize")));
 
         String beginTime = date.get("startTime");
         String endTime = date.get("endTime");
+
+        //获取名称
+        String name=parm.get("name");
 
         if(!StringUtils.isAnyBlank(beginTime,endTime)){
             //将时间格式化
@@ -52,12 +54,27 @@ public class DeviceServiceImpl implements DeviceService {
                 e.printStackTrace();
             }
 
-            ArrayList<Device> devices = deviceMapper.getAllDeviceByTime(page, beginTime1, endTime1);
-            return Result.success(devices);
-        }else{
-            ArrayList<Device> devices = deviceMapper.getAllDevice(page);
+            if(!StringUtils.isBlank(name)){
+                deviceMapper.getAllDeviceByTimeAndName(page, beginTime1, endTime1,name);
+                return Result.success(page);
+            }
+            else {
+                deviceMapper.getAllDeviceByTime(page, beginTime1, endTime1);
+                return Result.success(page);
+            }
 
-            return Result.success(devices);
+
+        }else{
+            if(!StringUtils.isBlank(name)){
+                deviceMapper.getAllDeviceByName(page ,name);
+                return Result.success(page);
+            }
+            else {
+                deviceMapper.getAllDevice(page);
+                return Result.success(page);
+            }
+
+
         }
 
  /*       if(!StringUtils.isAllBlank(beginTime,endTime)) {

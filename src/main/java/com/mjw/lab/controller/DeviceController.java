@@ -22,9 +22,9 @@ public class DeviceController {
     private DeviceService deviceService;
 
     @GetMapping
-    public Result getAllDevice(@RequestParam(required = false) Map<String,String> date,@RequestParam Map<String,String> pageParm){
+    public Result getAllDevice(@RequestParam(required = false) Map<String,String> date,@RequestParam(required=true) Map<String,String> parm){
 
-        return deviceService.getAllDevice(date,pageParm);
+        return deviceService.getAllDevice(date,parm);
     }
 
     @PostMapping

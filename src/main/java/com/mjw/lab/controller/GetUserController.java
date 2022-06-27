@@ -17,14 +17,10 @@ public class GetUserController {
     private GetUserService getUserService;
 
     @GetMapping("/{type}")
-    public Result getAllBorrower(@PathVariable String type, @RequestParam Map<String,String> pageParm){
-        return getUserService.getAllBorrower(type,pageParm);
+    public Result getAllBorrower(@PathVariable String type, @RequestParam Map<String,String> pageParm ,@RequestParam(required = false,value = "name")String name){
+        return getUserService.getAllBorrower(type,pageParm,name);
     }
 
-    @GetMapping("/count")
-    public Result count(){
-        return getUserService.count();
-    }
 
 
 }

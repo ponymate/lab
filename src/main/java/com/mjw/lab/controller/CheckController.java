@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author:Ponymate
- * @Description:
+ * @Description: 检查预约申请单是否通过
  * @Date:Created in 10:37 2022/4/7
  * @Modified By:
  */

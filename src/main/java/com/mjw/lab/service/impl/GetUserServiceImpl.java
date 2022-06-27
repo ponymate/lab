@@ -1,6 +1,5 @@
 package com.mjw.lab.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mjw.lab.dao.mapper.OutsiderMapper;
 import com.mjw.lab.dao.mapper.StudentMapper;
@@ -11,6 +10,7 @@ import com.mjw.lab.service.GetUserService;
 import com.mjw.lab.utils.AdmThreadLocal;
 import com.mjw.lab.utils.PermissionUtils;
 import com.mjw.lab.utils.UserThreadLocal;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,31 +41,40 @@ public class GetUserServiceImpl implements GetUserService {
 
 
 
-    public Result getAllStudent(Map<String,String> pageParm) {
+    public Result getAllStudent(Map<String,String> pageParm,String name) {
         Page<Student> studentPage = new Page<Student>(Integer.parseInt(pageParm.get("currentPage")), Integer.parseInt(pageParm.get("pageSize")));
 
         DeviceAdm deviceAdm = AdmThreadLocal.get();
         Borrower borrower = UserThreadLocal.get();
 
-        LambdaQueryWrapper<Student> wrapper = new LambdaQueryWrapper<>();
+
 
         if(!(deviceAdm!=null||(borrower!=null&&borrower.getType().equals("teacher"))))
             return Result.fail(1005 ,"Insufficient permissions");
 
-/*        wrapper.eq(Student::isExist,true);
+/*      LambdaQueryWrapper<Student> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Student::isExist,true);
         List<Student> students = studentMapper.selectList(wrapper);
         Page<Student> studentPage1 = studentMapper.selectPage(studentPage, wrapper);*/
-        
-        List<Student> students = null;
-        if(borrower!=null&&borrower.getType().equals("teacher"))
-            students = studentMapper.getTeacherStudent(studentPage,borrower.getId());
-        else
-            students = studentMapper.getAllStudent(studentPage);
+
+        Page<Student> students = null;
+        if(borrower!=null&&borrower.getType().equals("teacher")){
+            if(!StringUtils.isBlank(name))
+                students = studentMapper.getTeacherStudentByName(studentPage,borrower.getId(),name);
+            else
+                students = studentMapper.getTeacherStudent(studentPage,borrower.getId());
+        }
+        else{
+            if(!StringUtils.isBlank(name))
+                students = studentMapper.getAllStudentByName(studentPage,name);
+            else
+                students = studentMapper.getAllStudent(studentPage);
+        }
         return Result.success(students);
     }
 
 
-    public Result getAllOutsider(Map<String,String> page) {
+    public Result getAllOutsider(Map<String,String> page,String name) {
         Page<Outsider> outsiderPage = new Page<Outsider>(Integer.parseInt(page.get("currentPage")),Integer.parseInt(page.get("pageSize")));
 
         if(permissionUtils.isNotAdm())
@@ -76,13 +85,18 @@ public class GetUserServiceImpl implements GetUserService {
         List<Outsider> outsiders = outsiderMapper.selectList(wrapper);
 
         Page<Outsider> outsiderPage1 = outsiderMapper.selectPage(outsiderPage, wrapper);*/
+        Page<Outsider> outsiders = null;
 
-        List<Outsider> outsiders = outsiderMapper.getAllOutsider(outsiderPage);
+        if(!StringUtils.isBlank(name))
+            outsiders = outsiderMapper.getAllOutsiderByName(outsiderPage,name);
+        else
+            outsiders = outsiderMapper.getAllOutsider(outsiderPage);
+
         return Result.success(outsiders);
     }
 
 
-    public Result getAllTeacher(Map<String,String> page) {
+    public Result getAllTeacher(Map<String,String> page,String name) {
         Page<Teacher> teacherPage = new Page<Teacher>(Integer.parseInt(page.get("currentPage")),Integer.parseInt(page.get("pageSize")));
 
         if(permissionUtils.isNotAdm())
@@ -95,21 +109,27 @@ public class GetUserServiceImpl implements GetUserService {
 
         Page<Teacher> teacherPage1 = teacherMapper.selectPage(teacherPage, wrapper);*/
 
-        List<Teacher> teachers = teacherMapper.getAllTeacher(teacherPage);
+        Page<Teacher> teachers = null;
+
+        if(!StringUtils.isBlank(name))
+            teachers = teacherMapper.getAllTeacherByName(teacherPage,name);
+        else
+            teachers = teacherMapper.getAllTeacher(teacherPage);
+
         return Result.success(teachers);
     }
 
     @Override
-    public Result getAllBorrower(String type, Map<String,String> page) {
+    public Result getAllBorrower(String type, Map<String,String> page,String name) {
 
 
         switch (type) {
             case "teacher":
-                return getAllTeacher(page);
+                return getAllTeacher(page,name);
             case "student":
-                return getAllStudent(page);
+                return getAllStudent(page,name);
             case "outsider":
-                return getAllOutsider(page);
+                return getAllOutsider(page,name);
             default:
                 return null;
         }

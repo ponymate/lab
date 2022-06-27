@@ -5,11 +5,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mjw.lab.dao.pojo.Outsider;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.List;
-
 @Mapper
 public interface OutsiderMapper extends BaseMapper<Outsider> {
 
-    public List<Outsider> getAllOutsider(Page<Outsider> page);
+    Page<Outsider> getAllOutsider(Page<Outsider> page);
 
+    Page<Outsider> getAllOutsiderByName(Page<Outsider> outsiderPage, String name);
 }

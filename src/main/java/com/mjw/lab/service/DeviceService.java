@@ -6,7 +6,7 @@ import com.mjw.lab.dao.vo.Result;
 import java.util.Map;
 
 public interface DeviceService {
-    Result getAllDevice(Map<String,String> date,Map<String,String> pageParm);
+    Result getAllDevice(Map<String,String> date,Map<String,String> parm);
 
     Result saveDevice(DeviceParm devices);
 

@@ -51,7 +51,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/check/**")
                 .addPathPatterns("/reservation")
                 .addPathPatterns("/emp/**")
-                .addPathPatterns("/emp");
+                .addPathPatterns("/emp")
+                .addPathPatterns("/reportForm");
 
     }
 }
