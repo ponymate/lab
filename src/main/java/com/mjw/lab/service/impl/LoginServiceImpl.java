@@ -2,7 +2,6 @@ package com.mjw.lab.service.impl;
 
 import com.mjw.lab.dao.mapper.OutsiderMapper;
 import com.mjw.lab.dao.mapper.StudentMapper;
-import com.mjw.lab.dao.mapper.TeaStuMapper;
 import com.mjw.lab.dao.mapper.TeacherMapper;
 import com.mjw.lab.dao.parm.Login;
 import com.mjw.lab.dao.parm.User;
@@ -37,9 +36,6 @@ public class LoginServiceImpl implements LoginService {
     private OutsiderMapper outsiderMapper;
 
     @Autowired
-    private TeaStuMapper teaStuMapper;
-
-    @Autowired
     private EmpService empService;
 
     /**
@@ -64,7 +60,6 @@ public class LoginServiceImpl implements LoginService {
         BeanUtils.copyProperties(student,s);
 
         studentMapper.insert(s);
-        teaStuMapper.insert(new TeaStu(student.getId(),student.getTutorId()));
 
         String token = JwtUtils.getJwtToken(student.getId(),student.getName(),"student");
 

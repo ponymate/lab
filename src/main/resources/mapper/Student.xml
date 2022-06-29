@@ -24,5 +24,9 @@
         select * from student,teacher where student.tutor_id=teacher.id and  student.name like '%${name}%'
     </select>
 
+    <select id="getTeaByStuId" resultType="com.mjw.lab.dao.pojo.Teacher">
+        select teacher.* from teacher,student where student.tutor_id=teacher.id and student.id=#{stuId} and student.tutor_id = #{teacherId}
+    </select>
+
 
 </mapper>

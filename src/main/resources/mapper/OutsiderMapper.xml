@@ -6,6 +6,10 @@
 
 
     <select id="getAllOutsider" resultType="com.mjw.lab.dao.pojo.Outsider">
-        select * from outsider_view
+        select * from outsider where exist = true
+    </select>
+
+    <select id="getAllOutsiderByName" resultType="com.mjw.lab.dao.pojo.Outsider">
+        select * from outsider where outsider.name like '%${name}%' and exist = true
     </select>
 </mapper>

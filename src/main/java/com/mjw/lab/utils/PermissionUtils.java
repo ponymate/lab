@@ -1,6 +1,6 @@
 package com.mjw.lab.utils;
 
-import com.mjw.lab.dao.mapper.TeaStuMapper;
+import com.mjw.lab.dao.mapper.StudentMapper;
 import com.mjw.lab.dao.pojo.DeviceAdm;
 import com.mjw.lab.dao.pojo.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class PermissionUtils {
 
     @Autowired
-    TeaStuMapper teaStuMapper;
+    StudentMapper studentMapper;
 
     public boolean isNotSelf(Long id){
         return UserThreadLocal.get() == null || !UserThreadLocal.get().getId().equals(id);
@@ -26,8 +26,9 @@ public class PermissionUtils {
         return AdmThreadLocal.get()==null;
     }
 
-    public boolean isNotTeacher(Long id){
-        Teacher teacher = teaStuMapper.getTeaByStuId(UserThreadLocal.get().getId(),id);
+    public boolean isNotTeacher(Long stuId){
+        Long teacherId = UserThreadLocal.get().getId();
+        Teacher teacher = studentMapper.getTeaByStuId(teacherId,stuId);
         return teacher==null;
     }
 

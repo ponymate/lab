@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface GetUserService {
 
-    Result getAllBorrower(String type, Map<String,String> pageParm);
+    Result getAllBorrower(String type, Map<String,String> pageParm,String name);
 
     Result count();
 }

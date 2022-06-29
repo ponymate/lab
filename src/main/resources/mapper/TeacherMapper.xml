@@ -6,6 +6,10 @@
 
 
     <select id="getAllTeacher" resultType="com.mjw.lab.dao.pojo.Teacher">
-        select * from teacher_view
+        select * from teacher where exist = true
+    </select>
+
+    <select id="getAllTeacherByName" resultType="com.mjw.lab.dao.pojo.Teacher">
+        select * from teacher where teacher.name like '%${name}%' and exist =true
     </select>
 </mapper>

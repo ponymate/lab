@@ -13,4 +13,13 @@
         select * from device where exist=true
     </select>
 
+    <select id="getAllDeviceByTimeAndName" resultType="com.mjw.lab.dao.pojo.Device">
+        select * from device where exist = true and device_type like '%${name}%' and id not in
+                                                                                     (select device_id from reservation_form where begin_time between #{startTime} and #{endTime})
+    </select>
+
+    <select id="getAllDeviceByName" resultType="com.mjw.lab.dao.pojo.Device">
+        select * from device where exist=true and device_type like '%${name}%'
+    </select>
+
 </mapper>

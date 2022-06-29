@@ -16,7 +16,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReservationFormServiceImpl implements ReservationFormService {
@@ -44,16 +47,16 @@ public class ReservationFormServiceImpl implements ReservationFormService {
     public Result creatForm(Long deviceId, FormParm reservationForm) {
 
         //检查数据是否全面并且正确，权限是否满足
-        if(StringUtils.isAnyBlank(reservationForm.getUseTime().toString(),reservationForm.getBeginTime().toString())){
-            return Result.fail(204,"All options cannot be empty");
+        if (StringUtils.isAnyBlank(reservationForm.getUseTime().toString(), reservationForm.getBeginTime().toString())) {
+            return Result.fail(204, "All options cannot be empty");
         }
 
-        if(UserThreadLocal.get()==null){
+        if (UserThreadLocal.get() == null) {
             return Result.fail(1005, "Insufficient permissions");
         }
         int time = reservationForm.getUseTime();
-        if(time%2!=0){
-            return Result.fail(1006,"data is wrong");
+        if (time % 2 != 0) {
+            return Result.fail(1006, "data is wrong");
         }
 
         //插入预约单
@@ -61,7 +64,7 @@ public class ReservationFormServiceImpl implements ReservationFormService {
         form.setDeviceId(deviceId);
         form.setBorrowerId(UserThreadLocal.get().getId());
         form.setType(UserThreadLocal.get().getType());
-        BeanUtils.copyProperties(reservationForm,form);
+        BeanUtils.copyProperties(reservationForm, form);
 
         reservationFormMapper.insert(form);
 
@@ -70,28 +73,28 @@ public class ReservationFormServiceImpl implements ReservationFormService {
 
 
     @Override
-    public Result getForms(Map<String, String> condition, String isChecked,Map<String,String> pageParm,String para) {
+    public Result getForms(Map<String, String> condition, String isChecked, Map<String, String> pageParm, String para) {
 
         List<ReservationForm> forms = null;
         Page<ReservationForm> page = new Page<>(Integer.parseInt(pageParm.get("currentPage")), Integer.parseInt(pageParm.get("pageSize")));
 
         switch (condition.get("type")) {
             case "student":
-                forms = getFormOfStudentByTeacher(isChecked.equals("true"),page);
+                forms = getFormOfStudentByTeacher(isChecked.equals("true"), page, para);
                 break;
             case "all":
-                forms = getAllForm(isChecked.equals("true"),page);
+                forms = getAllForm(isChecked.equals("true"), page, para);
                 break;
             case "my":
-                forms = getMyForm(isChecked.equals("true"),page);
+                forms = getMyForm(isChecked.equals("true"), page,para);
                 break;
             case "outsider":
-                forms = getOutsiderForm(isChecked.equals("true"),page);
+                forms = getOutsiderForm(isChecked.equals("true"), page,para);
         }
 
         List<ReservationFormVo> reservationFormVos = formToFormVo(forms);
 
-        //根据para进行模糊查找
+/*        //根据para进行模糊查找
         if(para!=null){
             Iterator<ReservationFormVo> iterator = reservationFormVos.iterator();
             while (iterator.hasNext()) {
@@ -100,27 +103,28 @@ public class ReservationFormServiceImpl implements ReservationFormService {
                     iterator.remove();
                 }
             }
-        }
+        }*/
 
         Collections.reverse(reservationFormVos);
+        Page<ReservationFormVo> pageVo = new Page<>(Integer.parseInt(pageParm.get("currentPage")), Integer.parseInt(pageParm.get("pageSize")));
+        BeanUtils.copyProperties(page, pageVo);
+        pageVo.setRecords(reservationFormVos);
 
-        return Result.success(reservationFormVos);
+        return Result.success(pageVo);
     }
 
 
-
-
     @Override
-    public List<ReservationFormVo> formToFormVo(List<ReservationForm> reservationForms){
+    public List<ReservationFormVo> formToFormVo(List<ReservationForm> reservationForms) {
 
-        if(reservationForms==null){
+        if (reservationForms == null) {
             return null;
         }
         List<ReservationFormVo> formVos = new ArrayList<>();
 
-        for (ReservationForm reservationForm :reservationForms) {
+        for (ReservationForm reservationForm : reservationForms) {
             ReservationFormVo formVo = new ReservationFormVo();
-            BeanUtils.copyProperties(reservationForm,formVo);
+            BeanUtils.copyProperties(reservationForm, formVo);
 
             //添加借用人
             String type = reservationForm.getType();
@@ -145,7 +149,7 @@ public class ReservationFormServiceImpl implements ReservationFormService {
 
             //添加老师姓名
             Teacher teacher = teacherMapper.selectById(reservationForm.getTeacherId());
-            if(teacher!=null) {
+            if (teacher != null) {
                 formVo.setTutorName(teacher.getName());
                 formVo.setProfessionDirection(teacher.getProfessionDirection());
                 formVo.setProfessionTitle(teacher.getProfessionTitle());
@@ -153,21 +157,21 @@ public class ReservationFormServiceImpl implements ReservationFormService {
 
             //添加设备
             Device device = deviceMapper.selectById(reservationForm.getDeviceId());
-            if(device!=null)
+            if (device != null)
                 formVo.setDeviceType(device.getDeviceType());
 
             //添加老师是否签名
-            if(reservationForm.getTeacherId()==null)
+            if (reservationForm.getTeacherId() == null)
                 formVo.setTeacherState("待审核");
-            else if(reservationForm.getTeacherId()==0L)
+            else if (reservationForm.getTeacherId() == 0L)
                 formVo.setTeacherState("未通过");
             else
                 formVo.setTeacherState("已通过");
 
             //添加设备管理员是否签名
-            if(reservationForm.getDeviceAdmId()==null)
+            if (reservationForm.getDeviceAdmId() == null)
                 formVo.setAdmState("待审核");
-            else if(reservationForm.getDeviceAdmId()==0L)
+            else if (reservationForm.getDeviceAdmId() == 0L)
                 formVo.setAdmState("未通过");
             else
                 formVo.setAdmState("已通过");
@@ -181,11 +185,11 @@ public class ReservationFormServiceImpl implements ReservationFormService {
 
     @Override
     public Result pay(Long id) {
-        if(permissionUtils.isNotOutsider())
+        if (permissionUtils.isNotOutsider())
             return Result.fail(1005, "Insufficient permissions");
 
         ReservationForm reservationForm = reservationFormMapper.selectById(id);
-        if(!reservationForm.getSuperState().equals("已通过"))
+        if (!reservationForm.getSuperState().equals("已通过"))
             return Result.fail(1010, "请缴费");
         else
             reservationForm.setPayed(true);
@@ -202,12 +206,30 @@ public class ReservationFormServiceImpl implements ReservationFormService {
     }
 
 
-    public List<ReservationForm> getAllForm(boolean isChecked,Page<ReservationForm> page){
+    public List<ReservationForm> getAllForm(boolean isChecked, Page<ReservationForm> page, String name) {
 
-        if(permissionUtils.isNotAdm())
+        if (permissionUtils.isNotAdm())
             return null;
 
-        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
+        Page<ReservationForm> forms = null;
+
+        if (isChecked) {
+            if (!StringUtils.isBlank(name)) {
+                forms = this.reservationFormMapper.getReservationOfAllIsCheckByName(page, name);
+            } else {
+
+                forms = this.reservationFormMapper.getReservationOfAllIsCheck(page);
+            }
+
+        } else if (!StringUtils.isBlank(name)) {
+            forms = this.reservationFormMapper.getReservationOfAllByName(page, name);
+        } else {
+            forms = this.reservationFormMapper.getReservationOfAll(page);
+        }
+
+        return forms.getRecords();
+
+/*        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
         if(isChecked){
             wrapper.isNull(ReservationForm::getDeviceAdmId);
         }
@@ -218,58 +240,111 @@ public class ReservationFormServiceImpl implements ReservationFormService {
 
         Page<ReservationForm> reservationFormPage = reservationFormMapper.selectPage(page, wrapper);
 
-        return reservationFormPage.getRecords();
+        return reservationFormPage.getRecords();*/
     }
 
 
-
-    public List<ReservationForm> getMyForm(boolean isChecked,Page<ReservationForm> page){
+    public List<ReservationForm> getMyForm(boolean isChecked, Page<ReservationForm> page, String name) {
 
 
         Borrower borrower = UserThreadLocal.get();
-        if(borrower==null){
+        if (borrower == null) {
             return null;
         }
 
-        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ReservationForm::getBorrowerId,borrower.getId());
-        if(isChecked){
+        Page<ReservationForm> forms = null;
+
+        if (isChecked) {
+            if (!StringUtils.isBlank(name)) {
+                forms = this.reservationFormMapper.getReservationOfMyIsCheckByName(page, name, borrower.getId());
+            } else {
+
+                forms = this.reservationFormMapper.getReservationOfMyIsCheck(page, borrower.getId());
+            }
+
+        } else if (!StringUtils.isBlank(name)) {
+            forms = this.reservationFormMapper.getReservationOfMyByName(page, name, borrower.getId());
+        } else {
+            forms = this.reservationFormMapper.getReservationOfMy(page, borrower.getId());
+        }
+
+        return forms.getRecords();
+
+/*        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ReservationForm::getBorrowerId, borrower.getId());
+        if (isChecked) {
             wrapper.isNull(ReservationForm::getDeviceAdmId);
         }
-        wrapper.eq(ReservationForm::isExist,true);
-
+        wrapper.eq(ReservationForm::isExist, true);
 
 
         Page<ReservationForm> reservationFormPage = reservationFormMapper.selectPage(page, wrapper);
 
-        return reservationFormPage.getRecords();
+        return reservationFormPage.getRecords();*/
     }
 
-    private List<ReservationForm> getOutsiderForm(boolean isChecked, Page<ReservationForm> page) {
+    private List<ReservationForm> getOutsiderForm(boolean isChecked, Page<ReservationForm> page, String name) {
 
-        if(permissionUtils.isNotAdm())
+        if (permissionUtils.isNotAdm())
             return null;
 
-        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
-        if(isChecked){
+        Page<ReservationForm> forms = null;
+
+        if (isChecked) {
+            if (!StringUtils.isBlank(name)) {
+                forms = this.reservationFormMapper.getReservationOfOutIsCheckByName(page, name);
+            } else {
+
+                forms = this.reservationFormMapper.getReservationOfOutIsCheck(page);
+            }
+
+        } else if (!StringUtils.isBlank(name)) {
+            forms = this.reservationFormMapper.getReservationOfOutByName(page, name);
+        } else {
+            forms = this.reservationFormMapper.getReservationOfOut(page);
+        }
+
+        return forms.getRecords();
+
+/*        LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
+        if (isChecked) {
             wrapper.isNull(ReservationForm::getDeviceAdmId);
         }
-        wrapper.eq(ReservationForm::isExist,true);
-        wrapper.eq(ReservationForm::getType,"outsider");
+        wrapper.eq(ReservationForm::isExist, true);
+        wrapper.eq(ReservationForm::getType, "outsider");
 
 
         Page<ReservationForm> reservationFormPage = reservationFormMapper.selectPage(page, wrapper);
 
-        return reservationFormPage.getRecords();
+        return reservationFormPage.getRecords();*/
 
     }
 
 
-    public List<ReservationForm> getFormOfStudentByTeacher(boolean isChecked,Page<ReservationForm> page){
+    public List<ReservationForm> getFormOfStudentByTeacher(boolean isChecked, Page<ReservationForm> page,String name) {
         Borrower borrower = UserThreadLocal.get();
-        if(borrower==null||!borrower.getType().equals("teacher")){
+        if (borrower == null || !borrower.getType().equals("teacher")) {
             return null;
         }
+
+        Page<ReservationForm> forms = null;
+
+        if (isChecked) {
+            if (!StringUtils.isBlank(name)) {
+                forms = this.reservationFormMapper.getReservationOfStuIsCheckByName(page, name, borrower.getId());
+            } else {
+
+                forms = this.reservationFormMapper.getReservationOfStuIsCheck(page, borrower.getId());
+            }
+
+        } else if (!StringUtils.isBlank(name)) {
+            forms = this.reservationFormMapper.getReservationOfStuByName(page, name, borrower.getId());
+        } else {
+            forms = this.reservationFormMapper.getReservationOfStu(page, borrower.getId());
+        }
+
+        return forms.getRecords();
+
 
 /*        //条件筛选
         Long teacherId = borrower.getId();
@@ -296,20 +371,19 @@ public class ReservationFormServiceImpl implements ReservationFormService {
             }
         }*/
 
-        Long teacherId = borrower.getId();
+/*        Long teacherId = borrower.getId();
         ArrayList<ReservationForm> reservationForm;
-        if(isChecked) {
+        if (isChecked) {
             reservationForm = reservationFormMapper.getReservationOfStudentIsCheck(page, teacherId);
-        }
-        else
-            reservationForm = reservationFormMapper.getReservationOfStudent(page,teacherId);
+        } else
+            reservationForm = reservationFormMapper.getReservationOfStudent(page, teacherId);
 
-        return reservationForm;
+        return reservationForm;*/
     }
 
 
     @Override
-    public Result getForm(Long id,String type) {
+    public Result getForm(Long id, String type) {
 
         ReservationForm reservationForm = reservationFormMapper.selectById(id);
 
@@ -317,16 +391,16 @@ public class ReservationFormServiceImpl implements ReservationFormService {
         //权限检查
         switch (type) {
             case "student":
-                if(permissionUtils.isNotTeacher(reservationForm.getBorrowerId()))
-                    return Result.fail(1005,"Insufficient permissions");
+                if (permissionUtils.isNotTeacher(reservationForm.getBorrowerId()))
+                    return Result.fail(1005, "Insufficient permissions");
                 break;
             case "all":
-                if(permissionUtils.isNotAdm())
-                    return Result.fail(1005,"Insufficient permissions");
+                if (permissionUtils.isNotAdm())
+                    return Result.fail(1005, "Insufficient permissions");
                 break;
             case "my":
-                if(permissionUtils.isNotSelf(reservationForm.getBorrowerId()))
-                    return Result.fail(1005,"Insufficient permissions");
+                if (permissionUtils.isNotSelf(reservationForm.getBorrowerId()))
+                    return Result.fail(1005, "Insufficient permissions");
                 break;
             default:
                 return Result.fail(500, "type is not right");
@@ -344,19 +418,19 @@ public class ReservationFormServiceImpl implements ReservationFormService {
     public Result deleteForm(Long id) {
 
         ReservationForm form = reservationFormMapper.selectById(id);
-        if(form==null){
-            return Result.fail(1000,null);
+        if (form == null) {
+            return Result.fail(1000, null);
         }
         Borrower borrower = UserThreadLocal.get();
         DeviceAdm deviceAdm = AdmThreadLocal.get();
-        if(!borrower.getId().equals(form.getBorrowerId())&&deviceAdm==null){
-            return Result.fail(1005,"Insufficient permissions");
+        if (!borrower.getId().equals(form.getBorrowerId()) && deviceAdm == null) {
+            return Result.fail(1005, "Insufficient permissions");
         }
 
         form.setExist(false);
         LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ReservationForm::getId,id);
-        reservationFormMapper.update(form,wrapper);
+        wrapper.eq(ReservationForm::getId, id);
+        reservationFormMapper.update(form, wrapper);
 
         return Result.success(form);
     }
@@ -366,30 +440,28 @@ public class ReservationFormServiceImpl implements ReservationFormService {
         ReservationForm form = reservationFormMapper.selectById(id);
 
         Borrower borrower = UserThreadLocal.get();
-        if(!borrower.getId().equals(form.getBorrowerId())){
-            return Result.fail(1005,"Insufficient permissions");
+        if (!borrower.getId().equals(form.getBorrowerId())) {
+            return Result.fail(1005, "Insufficient permissions");
         }
 
-        if(StringUtils.isAllBlank(reservationForm.getUseTime().toString(),reservationForm.getBeginTime().toString())){
-            return Result.fail(204,"All options cannot be empty");
+        if (StringUtils.isAllBlank(reservationForm.getUseTime().toString(), reservationForm.getBeginTime().toString())) {
+            return Result.fail(204, "All options cannot be empty");
         }
-        if(!StringUtils.isBlank(reservationForm.getUseTime().toString())){
+        if (!StringUtils.isBlank(reservationForm.getUseTime().toString())) {
             form.setUseTime(reservationForm.getUseTime());
         }
-        if(!StringUtils.isBlank(reservationForm.getBeginTime().toString())){
+        if (!StringUtils.isBlank(reservationForm.getBeginTime().toString())) {
             form.setBeginTime(reservationForm.getBeginTime());
         }
 
         LambdaQueryWrapper<ReservationForm> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ReservationForm::getId,id);
-        reservationFormMapper.update(form,wrapper);
+        wrapper.eq(ReservationForm::getId, id);
+        reservationFormMapper.update(form, wrapper);
 
         form = reservationFormMapper.selectById(id);
 
         return Result.success(form);
     }
-
-
 
 
 }

@@ -4,22 +4,135 @@
 
 <mapper namespace="com.mjw.lab.dao.mapper.ReservationFormMapper">
 
-    <select id="getReservationOfStudent" resultType="com.mjw.lab.dao.pojo.ReservationForm">
-        select reservation_form.* from reservation_form,tea_stu,teacher
-            where reservation_form.type='student'
-              and reservation_form.exist=true
-              and reservation_form.borrower_id=tea_stu.student_id
-              and tea_stu.teacher_id=#{teacherId}
+    <!--学生-->
+
+    <select id="getReservationOfStuByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,student,device
+        where reservation_form.type='student'
+          and reservation_form.borrower_id=student.id
+          and student.tutor_id = #{teacher}
+          and reservation_form.device_id = device.id
+          and device.device_type like '%${name}%'
+
     </select>
 
-    <select id="getReservationOfStudentIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
-        select reservation_form.* from reservation_form,tea_stu,teacher
+    <select id="getReservationOfStuIsCheckByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,student,device
         where reservation_form.type='student'
+          and reservation_form.borrower_id=student.id
+          and student.tutor_id = #{teacher}
           and reservation_form.exist=true
-          and reservation_form.device_adm_id is not null
-          and reservation_form.borrower_id=tea_stu.student_id
-          and tea_stu.teacher_id=#{teacherId}
+          and reservation_form.device_id = device.id
+          and device.device_type like '%${name}%'
     </select>
+
+    <select id="getReservationOfStuIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,student
+        where reservation_form.type='student'
+          and reservation_form.borrower_id=student.id
+          and student.tutor_id = #{teacher}
+          and reservation_form.exist=true
+    </select>
+
+    <select id="getReservationOfStu" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form,student
+        where reservation_form.type='student'
+          and reservation_form.borrower_id=student.id
+          and student.tutor_id = #{teacher}
+    </select>
+
+
+    <!--    //全部-->
+    <select id="getReservationOfAllByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.device_id=device.id
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfAll" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form
+        where reservation_form.exist=true
+
+    </select>
+
+    <select id="getReservationOfAllIsCheckByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.device_id=device.id
+          and reservation_form.device_adm_id is not null
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfAllIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.device_id=device.id
+          and reservation_form.device_adm_id is not null
+    </select>
+
+    <!--    //自己-->
+    <select id="getReservationOfMyIsCheckByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.borrower_id=#{id}
+          and reservation_form.device_adm_id is not null
+          and reservation_form.device_id=device.id
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfMyIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.borrower_id=#{id}
+          and reservation_form.device_adm_id is not null
+          and reservation_form.device_id=device.id
+    </select>
+
+    <select id="getReservationOfMyByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.borrower_id=#{id}
+          and reservation_form.device_id=device.id
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfMy" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form , device
+        where reservation_form.exist=true
+          and reservation_form.borrower_id=#{id}
+          and reservation_form.device_id=device.id
+    </select>
+
+    <!--    外人-->
+    <select id="getReservationOfOutIsCheckByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form ,device
+        where reservation_form.exist=true
+          and reservation_form.type = 'outsider'
+          and reservation_form.device_adm_id is not null
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfOutIsCheck" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form ,device
+        where reservation_form.exist=true
+          and reservation_form.type = 'outsider'
+          and reservation_form.device_adm_id is not null
+    </select>
+
+    <select id="getReservationOfOutByName" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form ,device
+        where reservation_form.exist=true
+          and reservation_form.type = 'outsider'
+          and device.device_type like '%${name}%'
+    </select>
+
+    <select id="getReservationOfOut" resultType="com.mjw.lab.dao.pojo.ReservationForm">
+        select reservation_form.* from reservation_form ,device
+        where reservation_form.exist=true
+          and reservation_form.type = 'outsider'
+    </select>
+
 
 
 </mapper>
